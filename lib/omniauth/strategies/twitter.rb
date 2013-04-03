@@ -39,8 +39,13 @@ module OmniAuth
 
       def request_phase
         force_login = session['omniauth.params'] ? session['omniauth.params']['force_login'] : nil
-        screen_name = session['omniauth.params'] ? session['omniauth.params']['screen_name'] : nil
+        screen_name = session['omniauth.params'] ? session['omniauth.params']['screen_name'] : ni
+        force_redirect = session['omniauth.params'] ? session['omniauth.params']['force_redirect'] : nil
         x_auth_access_type = session['omniauth.params'] ? session['omniauth.params']['x_auth_access_type'] : nil
+        if force_redirect && !force_redirect.empty?
+          options[:authorize_params] ||= {}
+          options[:authorize_params].merge!(:force_redirect => 'true')
+        end
         if force_login && !force_login.empty?
           options[:authorize_params] ||= {}
           options[:authorize_params].merge!(:force_login => 'true')
@@ -53,7 +58,6 @@ module OmniAuth
           options[:request_params] ||= {}
           options[:request_params].merge!(:x_auth_access_type => x_auth_access_type)
         end
-
         if session['omniauth.params'] && session['omniauth.params']["use_authorize"] == "true"
           options.client_options.authorize_path = '/oauth/authorize'
         else
